@@ -15,23 +15,31 @@ var FOUR = big.NewInt(4)
 var CPU_COUNT = runtime.NumCPU()
 
 type PrimeGenerator struct {
-	state *big.Int
+	state uint
 }
 
-func (pg *PrimeGenerator) Next() *big.Int {
-	ret := new(big.Int)
-
-	for !pg.state.ProbablyPrime(10) {
-		pg.state.Add(pg.state, TWO)
+func IsPrime(p uint) bool {
+	for i := uint(2); i*i <= p; i++ {
+		if p%i == 0 {
+			return false
+		}
 	}
+	return true
+}
 
-	ret.Set(pg.state)
-	pg.state.Add(pg.state, TWO)
+func (pg *PrimeGenerator) Next() uint {
+	var ret uint
+
+	for !IsPrime(pg.state) {
+		pg.state += 2
+	}
+	ret = pg.state
+	pg.state += 2
 	return ret
 }
 
 func NewPG() PrimeGenerator {
-	return PrimeGenerator{big.NewInt(3)}
+	return PrimeGenerator{3}
 }
 
 func LLT(p uint, leastSigMask, M, s, remainingBits *big.Int) bool {
@@ -140,7 +148,7 @@ func main() {
 	go func() {
 		pg := NewPG()
 		for count < target {
-			input <- uint(pg.Next().Uint64())
+			input <- pg.Next()
 		}
 	}()
 
