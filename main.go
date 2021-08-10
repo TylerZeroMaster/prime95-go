@@ -79,12 +79,12 @@ func LLT(p uint, leastSigMask, M, s, remainingBits *big.Int) bool {
 }
 
 func workerLLT(input, output chan uint) {
-    // Make each big.Int live for the lifetime of the worker
-    leastSigMask := new(big.Int)
+	// Make each big.Int live for the lifetime of the worker
+	leastSigMask := new(big.Int)
 	M := new(big.Int)
 	s := new(big.Int)
 	remainingBits := new(big.Int)
-	
+
 	for n := range input {
 		if LLT(n, leastSigMask, M, s, remainingBits) {
 			output <- n
@@ -116,10 +116,10 @@ func StoI(s string, r int) int {
 		i--
 		b = s[i] ^ 0x30
 		if b > 10 {
-		    if i == 0 && b == 29 {
-		        ret *= -1
-		        return ret
-		    }
+			if i == 0 && b == 29 {
+				ret *= -1
+				return ret
+			}
 			continue
 		}
 		ret += int(b) * ax
@@ -130,16 +130,16 @@ func StoI(s string, r int) int {
 }
 
 func main() {
-    var target int
-	input := make(chan uint, CPU_COUNT * 2)
+	var target int
+	input := make(chan uint, CPU_COUNT*2)
 	output := make(chan uint, CPU_COUNT)
 	count := 0
-	
+
 	if len(os.Args) > 1 {
-    	target = StoI(os.Args[1], 10)
-    } else {
-        target = 95
-    }
+		target = StoI(os.Args[1], 10)
+	} else {
+		target = 100
+	}
 
 	for i := 0; i < CPU_COUNT; i++ {
 		go workerLLT(input, output)
@@ -156,7 +156,7 @@ func main() {
 		fmt.Println(<-output)
 		count++
 	}
-	
+
 	close(input)
 	close(output)
 }

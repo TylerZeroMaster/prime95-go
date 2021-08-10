@@ -1,3 +1,3 @@
-module tylerzeromaster.github.io/prime95-go
+module github.com/tylerzeromaster/prime95-go
 
 go 1.16
