@@ -10,6 +10,9 @@ import (
 var ZERO = big.NewInt(0)
 var ONE = big.NewInt(1)
 var TWO = big.NewInt(2)
+var FOUR = big.NewInt(4)
+
+var CPU_COUNT = runtime.NumCPU()
 
 type PrimeGenerator struct {
 	state *big.Int
@@ -27,24 +30,23 @@ func (pg *PrimeGenerator) Next() *big.Int {
 	return ret
 }
 
-func NewPG() *PrimeGenerator {
-	return &PrimeGenerator{big.NewInt(3)}
+func NewPG() PrimeGenerator {
+	return PrimeGenerator{big.NewInt(3)}
 }
 
-func LLT(p uint) bool {
+func LLT(p uint, leastSigMask, M, s, remainingBits *big.Int) bool {
 	// leastSigMask = (1<<p) - 1;
-	leastSigMask := big.NewInt(1)
+	leastSigMask.Set(ONE)
 	leastSigMask.Lsh(leastSigMask, p)
 	leastSigMask.Sub(leastSigMask, ONE)
 
 	// M = 2**p - 1
-	M := big.NewInt(2)
+	M.Set(TWO)
 	M.Exp(M, big.NewInt(int64(p)), nil)
 	M.Sub(M, ONE)
 
-	s := big.NewInt(4)
+	s.Set(FOUR)
 	rptCnt := p - 2
-	remainingBits := new(big.Int)
 
 	for i := uint(0); i < rptCnt; i++ {
 		// s = s * s - 2
@@ -69,8 +71,14 @@ func LLT(p uint) bool {
 }
 
 func workerLLT(input, output chan uint) {
+    // Make each big.Int live for the lifetime of the worker
+    leastSigMask := new(big.Int)
+	M := new(big.Int)
+	s := new(big.Int)
+	remainingBits := new(big.Int)
+	
 	for n := range input {
-		if LLT(n) {
+		if LLT(n, leastSigMask, M, s, remainingBits) {
 			output <- n
 		}
 	}
@@ -102,7 +110,7 @@ func StoI(s string, r int) int {
 		if b > 10 {
 		    if i == 0 && b == 29 {
 		        ret *= -1
-		        break
+		        return ret
 		    }
 			continue
 		}
@@ -115,9 +123,8 @@ func StoI(s string, r int) int {
 
 func main() {
     var target int
-	cpuCount := runtime.NumCPU()
-	input := make(chan uint, cpuCount * 2)
-	output := make(chan uint, cpuCount)
+	input := make(chan uint, CPU_COUNT * 2)
+	output := make(chan uint, CPU_COUNT)
 	count := 0
 	
 	if len(os.Args) > 1 {
@@ -126,7 +133,7 @@ func main() {
         target = 95
     }
 
-	for i := 0; i < cpuCount; i++ {
+	for i := 0; i < CPU_COUNT; i++ {
 		go workerLLT(input, output)
 	}
 
