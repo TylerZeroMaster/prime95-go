@@ -42,16 +42,11 @@ func NewPG() PrimeGenerator {
 	return PrimeGenerator{3}
 }
 
-func LLT(p uint, leastSigMask, M, s, remainingBits *big.Int) bool {
-	// leastSigMask = (1<<p) - 1;
+func LLT(p uint, leastSigMask, s, remainingBits *big.Int) bool {
+	// leastSigMask = M = (1<<p) - 1 = 2**p - 1
 	leastSigMask.Set(ONE)
 	leastSigMask.Lsh(leastSigMask, p)
 	leastSigMask.Sub(leastSigMask, ONE)
-
-	// M = 2**p - 1
-	M.Set(TWO)
-	M.Exp(M, big.NewInt(int64(p)), nil)
-	M.Sub(M, ONE)
 
 	s.Set(FOUR)
 	rptCnt := p - 2
@@ -75,18 +70,17 @@ func LLT(p uint, leastSigMask, M, s, remainingBits *big.Int) bool {
 		}
 	}
 
-	return s.Cmp(M) == 0
+	return s.Cmp(leastSigMask) == 0
 }
 
 func workerLLT(input, output chan uint) {
 	// Make each big.Int live for the lifetime of the worker
 	leastSigMask := new(big.Int)
-	M := new(big.Int)
 	s := new(big.Int)
 	remainingBits := new(big.Int)
 
 	for n := range input {
-		if LLT(n, leastSigMask, M, s, remainingBits) {
+		if LLT(n, leastSigMask, s, remainingBits) {
 			output <- n
 		}
 	}

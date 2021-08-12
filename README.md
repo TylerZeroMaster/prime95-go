@@ -1,7 +1,7 @@
 # Prime95-go
 
 ## About
-This program finds [Mersenne prime numbers](https://en.wikipedia.org/wiki/Mersenne_prime) in sequence starting at three. I made this program so that I would become more familiar with big number libraries. It utilizes my implementation of an [optimized modulo](https://en.wikipedia.org/wiki/Lucas%E2%80%93Lehmer_primality_test#Time_complexity) operation. I did not, however, implement a FFT multiplication algorithm.
+This program finds [Mersenne prime numbers](https://en.wikipedia.org/wiki/Mersenne_prime) in sequence starting at three. I made this program so that I would become more familiar with big number libraries. It utilizes my implementation of an [optimized modulo](https://en.wikipedia.org/wiki/Lucas%E2%80%93Lehmer_primality_test#Time_complexity) operation. I did not, however, implement any FFT multiplication.
 
 ## Performance Findings
 
@@ -13,7 +13,7 @@ All tests were conducted on an Intel Core i5-4690K. Each test consisted of findi
 
 | Environment      | Time (seconds) |
 | ---------------- |:--------------:|
-| Golang           | 11             |
+| Golang v1.16     | 11             |
 | Python v3.9.1    | 30             |
 | .NET v5.0.201    | 36             |
 | Node.js v14.15.0 | 77             |
